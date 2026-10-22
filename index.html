@@ -159,6 +159,23 @@ input::placeholder,textarea::placeholder{color:var(--muted-2)}
 .sigbox:focus-visible{outline:3px solid var(--green)}
 .sigbox img{max-height:90px;max-width:100%}
 
+.sigs.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ts{font-size:.78rem;color:var(--muted);font-weight:700}
+.party{border:1.5px solid var(--green);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px;background:var(--soft)}
+.party h3{font-family:var(--f-title);font-weight:700;color:var(--green);font-size:1.2rem}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.decl{background:var(--green-d);color:#fff;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.decl p{margin:0;font-weight:700}
+.decl .radio{background:transparent;color:#fff;border-color:rgba(255,255,255,.6)}
+.decl .radio:has(input:checked){background:#fff;color:var(--green-d);border-color:#fff}
+.decl textarea{background:#fff;color:#1b2a22;border-color:#fff}
+.folio{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.folio .th{width:120px;aspect-ratio:4/3}
+.folio .btns{display:flex;flex-direction:column;gap:8px}
+.privacy{font-size:.8rem;color:var(--muted)}
+.sigbox:disabled,.sigbox[aria-disabled=true]{opacity:.5;cursor:not-allowed}
+.sigNote{background:var(--soft-2);border-radius:10px;padding:10px 12px;font-weight:700;font-size:.92rem}
+.party-sum{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:.92rem}
 /* Resumen */
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .stat{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px}
@@ -199,7 +216,7 @@ input::placeholder,textarea::placeholder{color:var(--muted-2)}
   .ev .thumbs{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 @media (max-width:640px){
-  .grid,.sigs,.types{grid-template-columns:1fr}
+  .grid,.sigs,.sigs.two,.types{grid-template-columns:1fr}
   .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .tt h1{font-size:1.1rem} .tt .code{font-size:.66rem}
   .logo{width:52px;height:40px} .logo img{width:44px}
@@ -234,6 +251,7 @@ input::placeholder,textarea::placeholder{color:var(--muted-2)}
 
 <div class="modal" id="sigModal" hidden><div class="mbox" role="dialog" aria-modal="true" aria-labelledby="sigTitle">
   <h3 id="sigTitle"></h3>
+  <div class="sigNote" id="sigNote" hidden></div>
   <div class="padw"><canvas id="sigCv"></canvas><div class="ln"></div><div class="lt" data-i="signLine">Firma sobre la línea</div></div>
   <div class="mrow"><button type="button" class="btn danger sm" id="sigClear" data-i="clear">Borrar</button><span class="sp"></span>
     <button type="button" class="btn sm" id="sigCancel" data-i="cancel">Cancelar</button><button type="button" class="btn solid sm" id="sigSave" data-i="saveSig">Guardar firma</button></div>
@@ -296,7 +314,18 @@ const TX = {
   addPiece:"+ Agregar pieza",del:"Quitar pieza",collapse:"Contraer o expandir",rmPhoto:"Quitar foto",
   sTitle:"Observaciones y registro",obs:"Observaciones generales",obsPh:"Ej. Rollo RL-00451 con golpe lateral detectado durante la descarga.",sian:"Daños registrados en SIAN",sianFolio:"Folio o referencia SIAN",
   fTitle:"Firmas",fSub:"Cada responsable escribe su nombre y firma con el dedo.",name:"Nombre",signHere:"✍️ Firmar aquí",reSign:"Toca para volver a firmar",
-  sigs:{inspector:"Inspector de mercancía",supervisor:"Supervisor",interesada:"Parte interesada"},
+  sigs:{inspector:"Inspector de mercancía",supervisor:"Supervisor",interesada:"Parte interesada",testigo:"Testigo TMAZ"},
+  signedAt:"Firmado",pTitleI:"Parte interesada",pmSign:"Firma la parte interesada",pmRefuse:"Se negó a firmar",
+  pFull:"Nombre completo",pEmp:"Empresa",pRep:"Representa a",reps:{buque:"Buque / tripulación",agente:"Agente naviero",transp:"Transportista",surveyor:"Surveyor",cliente:"Cliente / consignatario",otro:"Otro"},
+  pCargo:"Cargo",pIdT:"Tipo de identificación",idTypes:{ine:"INE",pas:"Pasaporte",lib:"Libreta de mar",otra:"Otra"},pIdN:"Número de identificación",pIdNPh:"Número o últimos 4 dígitos",
+  pFolio:"Folio de ingreso al recinto",pFolioPhoto:"Foto del folio de ingreso",pFolioHint:"Toma la foto del folio o pase con el que ingresó al recinto.",
+  declTxt:(n,d)=>`Recibí y revisé los daños descritos en este reporte: ${n} pieza${n===1?"":"s"} inspeccionada${n===1?"":"s"}, ${d} con daño.`,
+  conforme:"Conforme",reservas:"Con reservas",reservasLbl:"¿Cuáles reservas?",reservasPh:"Ej. No estoy de acuerdo con el daño marcado en la pieza 3",
+  declFirst:"Primero elige Conforme o Con reservas para habilitar la firma.",
+  refuseMotivo:"Motivo o comentario de la negativa",refuseNote:"Un testigo de TMAZ firma para dejar constancia de que la parte interesada se negó a firmar.",
+  privacy:"Los datos personales se tratan conforme al Aviso de Privacidad de TMAZ.",
+  sigShort:"La firma es demasiado corta. Firma completa sobre la línea.",
+  partyOk:"Firmó",partyRef:"Se negó a firmar",
   signLine:"Firma sobre la línea",clear:"Borrar",cancel:"Cancelar",saveSig:"Guardar firma",close:"Cerrar",sigEmpty:"Traza tu firma antes de guardar.",
   eTitle:"Resumen y exportación",eSub:"Revisa que todo esté correcto antes de descargar.",
   stPieces:"Piezas",stDmg:"Con daño",stOk:"Sin daño",stPh:"Fotos",
@@ -305,12 +334,14 @@ const TX = {
   resetWarn:"Se borrarán todos los datos, fotos y firmas de este reporte.",resetYes:"Borrar y empezar",
   prev:"← Anterior",next:s=>`Siguiente: ${s} →`,
   err:{servicio:"N.º de servicio / buque",fecha:"Fecha",turno:"Turno",ubicacion:"Ubicación de operación",inspector:"Nombre del inspector",tipo:"Tipo de mercancía",
-    id:i=>`Pieza ${i}: número de identificación`,mark:i=>`Pieza ${i}: marcar SD o el daño`,sig:"Firma del inspector"},
+    id:i=>`Pieza ${i}: número de identificación`,mark:i=>`Pieza ${i}: marcar SD o el daño`,sig:"Firma del inspector",
+    pName:"Parte interesada: nombre completo",pEmp:"Parte interesada: empresa",pRep:"Parte interesada: a quién representa",pFolioPh:"Parte interesada: foto del folio de ingreso",
+    pDecl:"Parte interesada: Conforme o Con reservas",pRes:"Parte interesada: escribir las reservas",pSig:"Firma de la parte interesada",tName:"Nombre del testigo TMAZ",tSig:"Firma del testigo TMAZ"},
   toastPdf:"PDF generado",toastSaved:"PDF guardado",toastDecl:"Descarga cancelada",toastNoSave:"No se pudo guardar el PDF en esta vista",toastLib:"No cargó el generador de PDF. Revisa tu conexión y recarga.",
   toastPhotos:n=>`${n} foto${n===1?"":"s"} agregada${n===1?"":"s"}`,toastPhErr:"No se pudo leer una de las fotos.",toastRestored:"Se recuperó el reporte que estabas llenando",toastEx:"Ejemplo cargado",toastNew:"Reporte nuevo listo",
   pdfT:"REPORTE DE DAÑOS EN MERCANCÍA",pdfDocType:"Tipo de documento: Registro",pdfArea:"Área: OPERACIONES",pdfDate:"Fecha",pdfVer:"Versión",pdfPage:(a,b)=>`Página ${a} de ${b}`,
   pdfMerc:"Mercancía",pdfInstr:"INSTRUCCIONES",pdfId:"IDENTIFICACIÓN",pdfNum:"Número de identificación",pdfPh:"FOTOS",pdfNote:"COMENTARIO",pdfPal:"TARIMA",
-  pdfObs:"Observaciones generales:",pdfNoObs:"Sin observaciones.",pdfSian:"Registro en SIAN:",pdfYes:"Sí",pdfFolio:"folio",pdfNotInd:"No indicado",pdfNA:"No aplica (sin daños)",
+  pdfState:"Estado",pdfDecl:"Declaración",pdfObs:"Observaciones generales:",pdfNoObs:"Sin observaciones.",pdfSian:"Registro en SIAN:",pdfYes:"Sí",pdfFolio:"folio",pdfNotInd:"No indicado",pdfNA:"No aplica (sin daños)",
   pdfSum:(t,d,o,f)=>`Resumen: ${t} pieza(s) · ${d} con daño · ${o} sin daño · ${f} foto(s) en anexo`,pdfSign:"Firma y nombre",pdfAnnex:"ANEXO FOTOGRÁFICO",pdfPhoto:"foto",pdfNoIdShort:"sin número",
   pdfFoot:"Copia no controlada si se imprime o descarga. Consulte la versión vigente en el repositorio oficial del SIG de TMAZ."},
  en:{ver:"Version 00",saved:"Saved in this browser",title:"Cargo damage report",dark:"● Dark",light:"○ Light",
@@ -334,7 +365,18 @@ const TX = {
   addPiece:"+ Add piece",del:"Remove piece",collapse:"Collapse or expand",rmPhoto:"Remove photo",
   sTitle:"Remarks and record",obs:"General remarks",obsPh:"E.g. Roll RL-00451 with side impact found during discharge.",sian:"Damage recorded in SIAN",sianFolio:"SIAN folio or reference",
   fTitle:"Signatures",fSub:"Each person types their name and signs with a finger.",name:"Name",signHere:"✍️ Sign here",reSign:"Tap to sign again",
-  sigs:{inspector:"Cargo inspector",supervisor:"Supervisor",interesada:"Interested party"},
+  sigs:{inspector:"Cargo inspector",supervisor:"Supervisor",interesada:"Interested party",testigo:"TMAZ witness"},
+  signedAt:"Signed",pTitleI:"Interested party",pmSign:"Interested party signs",pmRefuse:"Refused to sign",
+  pFull:"Full name",pEmp:"Company",pRep:"Represents",reps:{buque:"Vessel / crew",agente:"Shipping agent",transp:"Carrier",surveyor:"Surveyor",cliente:"Client / consignee",otro:"Other"},
+  pCargo:"Position",pIdT:"ID type",idTypes:{ine:"INE",pas:"Passport",lib:"Seaman's book",otra:"Other"},pIdN:"ID number",pIdNPh:"Number or last 4 digits",
+  pFolio:"Terminal entry folio",pFolioPhoto:"Photo of entry folio",pFolioHint:"Take a photo of the folio or pass used to enter the terminal.",
+  declTxt:(n,d)=>`I received and reviewed the damage described in this report: ${n} piece${n===1?"":"s"} inspected, ${d} damaged.`,
+  conforme:"Agree",reservas:"With reservations",reservasLbl:"Which reservations?",reservasPh:"E.g. I disagree with the damage marked on piece 3",
+  declFirst:"First choose Agree or With reservations to enable the signature.",
+  refuseMotivo:"Reason or comment for refusal",refuseNote:"A TMAZ witness signs to record that the interested party refused to sign.",
+  privacy:"Personal data is handled according to the TMAZ Privacy Notice.",
+  sigShort:"The signature is too short. Sign fully on the line.",
+  partyOk:"Signed",partyRef:"Refused to sign",
   signLine:"Sign on the line",clear:"Clear",cancel:"Cancel",saveSig:"Save signature",close:"Close",sigEmpty:"Draw your signature before saving.",
   eTitle:"Summary and export",eSub:"Check everything is correct before downloading.",
   stPieces:"Pieces",stDmg:"Damaged",stOk:"No damage",stPh:"Photos",
@@ -343,12 +385,14 @@ const TX = {
   resetWarn:"All data, photos and signatures in this report will be deleted.",resetYes:"Delete and start over",
   prev:"← Back",next:s=>`Next: ${s} →`,
   err:{servicio:"Service / vessel no.",fecha:"Date",turno:"Shift",ubicacion:"Operation location",inspector:"Inspector name",tipo:"Cargo type",
-    id:i=>`Piece ${i}: identification number`,mark:i=>`Piece ${i}: mark SD or the damage`,sig:"Inspector signature"},
+    id:i=>`Piece ${i}: identification number`,mark:i=>`Piece ${i}: mark SD or the damage`,sig:"Inspector signature",
+    pName:"Interested party: full name",pEmp:"Interested party: company",pRep:"Interested party: who they represent",pFolioPh:"Interested party: entry folio photo",
+    pDecl:"Interested party: Agree or With reservations",pRes:"Interested party: write the reservations",pSig:"Interested party signature",tName:"TMAZ witness name",tSig:"TMAZ witness signature"},
   toastPdf:"PDF generated",toastSaved:"PDF saved",toastDecl:"Download cancelled",toastNoSave:"The PDF could not be saved in this view",toastLib:"The PDF generator did not load. Check your connection and reload.",
   toastPhotos:n=>`${n} photo${n===1?"":"s"} added`,toastPhErr:"One of the photos could not be read.",toastRestored:"Your report in progress was restored",toastEx:"Example loaded",toastNew:"New report ready",
   pdfT:"CARGO DAMAGE REPORT",pdfDocType:"Document type: Record",pdfArea:"Area: OPERATIONS",pdfDate:"Date",pdfVer:"Version",pdfPage:(a,b)=>`Page ${a} of ${b}`,
   pdfMerc:"Cargo",pdfInstr:"INSTRUCTIONS",pdfId:"IDENTIFICATION",pdfNum:"Identification number",pdfPh:"PHOTOS",pdfNote:"COMMENT",pdfPal:"PALLET",
-  pdfObs:"General remarks:",pdfNoObs:"No remarks.",pdfSian:"SIAN record:",pdfYes:"Yes",pdfFolio:"folio",pdfNotInd:"Not stated",pdfNA:"N/A (no damage)",
+  pdfState:"Status",pdfDecl:"Statement",pdfObs:"General remarks:",pdfNoObs:"No remarks.",pdfSian:"SIAN record:",pdfYes:"Yes",pdfFolio:"folio",pdfNotInd:"Not stated",pdfNA:"N/A (no damage)",
   pdfSum:(t,d,o,f)=>`Summary: ${t} piece(s) · ${d} damaged · ${o} undamaged · ${f} photo(s) in annex`,pdfSign:"Signature and name",pdfAnnex:"PHOTO ANNEX",pdfPhoto:"photo",pdfNoIdShort:"no number",
   pdfFoot:"Uncontrolled copy if printed or downloaded. Check the current version in the official TMAZ SIG repository."}
 };
@@ -359,8 +403,13 @@ const today = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.ge
 const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const SIGK = ["inspector","supervisor","interesada"];
 const newPiece = (id="") => ({uid:uid(),id,marks:[],fotos:[],nota:"",open:true});
-function blank(){ return {v:2,step:0,tipo:null,servicio:"",fecha:today(),turno:"",ubicacion:"",inspector:"",piezas:[newPiece()],obs:"",sian:false,sianFolio:"",
-  firmas:{inspector:{nombre:"",img:null},supervisor:{nombre:"",img:null},interesada:{nombre:"",img:null}}}; }
+const blankSig = () => ({nombre:"",img:null,ts:null});
+const blankParty = () => ({modo:"firma",empresa:"",rep:"",cargo:"",idTipo:"ine",idNum:"",folio:"",folioFoto:null,decl:"",reservas:"",motivo:"",testigo:blankSig()});
+function blank(){ return {v:3,step:0,tipo:null,servicio:"",fecha:today(),turno:"",ubicacion:"",inspector:"",piezas:[newPiece()],obs:"",sian:false,sianFolio:"",
+  firmas:{inspector:blankSig(),supervisor:blankSig(),interesada:blankSig(),testigo:blankSig()},parte:blankParty()}; }
+function migrate(d){ if(!d) return null; if(d.v===3) return d; if(d.v!==2) return null;
+  const b=blank(); d.v=3; d.parte=b.parte; d.firmas={...b.firmas,...d.firmas}; Object.values(d.firmas).forEach(f=>{ if(!("ts" in f)) f.ts=null; }); return d; }
+const fmtTs = ts => { if(!ts) return ""; const d=new Date(ts), z=n=>String(n).padStart(2,"0"); return `${z(d.getDate())}/${z(d.getMonth()+1)}/${d.getFullYear()} ${z(d.getHours())}:${z(d.getMinutes())}`; };
 let S = blank();
 let LANG = "es", THEME = null, pendingType = null, confirmReset = false, sigKey = null;
 const L = () => TX[LANG];
@@ -384,8 +433,20 @@ function stepDone(i){
   if(i===0) return ["servicio","fecha","turno","ubicacion","inspector"].every(k=>String(S[k]||"").trim());
   if(i===1) return !!S.tipo;
   if(i===2) return !!S.tipo && S.piezas.length>0 && S.piezas.every(p=>p.id.trim() && p.marks.length);
-  if(i===3) return !!S.firmas.inspector.img;
+  if(i===3) return !partyIssues().length && !!S.firmas.inspector.img;
   return false;
+}
+function partyIssues(){
+  const e=L().err, P=S.parte, F=S.firmas, out=[];
+  if(P.modo==="negativa"){ if(!F.testigo.nombre.trim()) out.push(e.tName); if(!F.testigo.img) out.push(e.tSig); return out; }
+  if(!F.interesada.nombre.trim()) out.push(e.pName);
+  if(!P.empresa.trim()) out.push(e.pEmp);
+  if(!P.rep) out.push(e.pRep);
+  if(!P.folioFoto) out.push(e.pFolioPh);
+  if(!P.decl) out.push(e.pDecl);
+  if(P.decl==="reservas" && !P.reservas.trim()) out.push(e.pRes);
+  if(!F.interesada.img) out.push(e.pSig);
+  return out;
 }
 function issues(){
   const e=L().err, out=[];
@@ -393,6 +454,7 @@ function issues(){
   if(!S.tipo) out.push([e.tipo,1]);
   else S.piezas.forEach((p,i)=>{ if(!p.id.trim()) out.push([e.id(i+1),2]); if(!p.marks.length) out.push([e.mark(i+1),2]); });
   if(!S.firmas.inspector.img) out.push([e.sig,3]);
+  partyIssues().forEach(m=>out.push([m,3]));
   return out;
 }
 
@@ -454,15 +516,15 @@ function render(){
       <label class="chk"><input type="checkbox" id="sian" ${S.sian?"checked":""}> ${l.sian}</label>
       ${S.sian?`<label class="f"><span class="lbl">${l.sianFolio}</span><input type="text" id="sianFolio" data-k="sianFolio" value="${esc(S.sianFolio)}" autocomplete="off"></label>`:""}
     </section>
-    <section class="card"><h2>${l.fTitle}</h2><p class="sub">${l.fSub}</p><div class="sigs">${SIGK.map(k=>`<div class="sig"><h3>${l.sigs[k]}${k==="inspector"?' <span style="color:var(--red)">*</span>':""}</h3>
-      <label class="f"><span class="lbl">${l.name}</span><input type="text" data-sig="${k}" value="${esc(S.firmas[k].nombre)}" autocomplete="off"></label>
-      <button type="button" class="sigbox" data-sign="${k}" aria-label="${l.sigs[k]}: ${S.firmas[k].img?l.reSign:l.signHere}">${S.firmas[k].img?`<img src="${S.firmas[k].img}" alt="">`:l.signHere}</button></div>`).join("")}</div></section>`;
+    <section class="card"><h2>${l.fTitle}</h2><p class="sub">${l.fSub}</p><div class="sigs two">${["inspector","supervisor"].map(k=>sigCard(k,k==="inspector")).join("")}</div>
+      ${partyHTML()}</section>`;
   }
   if(S.step===4){
     const c=counts(), iss=issues(), t=TT();
     h+=`<section class="card"><h2>${l.eTitle}</h2><p class="sub">${l.eSub}</p>
       <div class="stats"><div class="stat"><b>${c.t}</b><span>${l.stPieces}</span></div><div class="stat r"><b>${c.d}</b><span>${l.stDmg}</span></div><div class="stat g"><b>${c.o}</b><span>${l.stOk}</span></div><div class="stat"><b>${c.f}</b><span>${l.stPh}</span></div></div>
       ${t?summaryTable(t):""}
+      <div class="party-sum">${partyLine()}</div>
       ${iss.length?`<div class="issues"><strong>${l.missing}</strong><ul>${iss.map(([m,s])=>`<li><button type="button" data-go="${s}">${esc(m)}</button></li>`).join("")}</ul></div>`:`<div class="okmsg">${l.ready}</div>`}
       <div class="navrow"><button type="button" class="btn danger" id="resetBtn">${l.newRep}</button><span class="sp"></span>
         ${canShare()?`<button type="button" class="btn" id="shareBtn" ${iss.length?"disabled":""}>${l.share}</button>`:""}
@@ -473,6 +535,45 @@ function render(){
   h+=navRow();
   m.innerHTML=h;
 }
+function sigCard(k,req,locked){
+  const l=L(), f=S.firmas[k];
+  return `<div class="sig"><h3>${l.sigs[k]}${req?' <span style="color:var(--red)">*</span>':""}</h3>
+    <label class="f"><span class="lbl">${k==="interesada"?l.pFull:l.name}${req?' <span style="color:var(--red)">*</span>':""}</span><input type="text" data-sig="${k}" value="${esc(f.nombre)}" autocomplete="off"></label>
+    <button type="button" class="sigbox" data-sign="${k}" ${locked?'aria-disabled="true"':""} aria-label="${l.sigs[k]}: ${f.img?l.reSign:l.signHere}">${f.img?`<img src="${f.img}" alt="">`:l.signHere}</button>
+    ${f.ts?`<span class="ts">${l.signedAt}: ${fmtTs(f.ts)}</span>`:""}</div>`;
+}
+function partyHTML(){
+  const l=L(), P=S.parte, c=counts(), R='<span style="color:var(--red)">*</span>';
+  let h=`<div class="party"><h3>${l.pTitleI}</h3>
+    <div class="radios">${[["firma",l.pmSign],["negativa",l.pmRefuse]].map(([v,t])=>`<label class="radio"><input type="radio" name="pmode" value="${v}" ${P.modo===v?"checked":""}>${t}</label>`).join("")}</div>
+    <div class="grid">
+      ${P.modo==="firma"?"":`<label class="f"><span class="lbl">${l.pFull}</span><input type="text" data-sig="interesada" value="${esc(S.firmas.interesada.nombre)}" autocomplete="off"></label>`}
+      <label class="f"><span class="lbl">${l.pEmp} ${P.modo==="firma"?R:""}</span><input type="text" data-pa="empresa" value="${esc(P.empresa)}" autocomplete="off"></label>
+      <label class="f"><span class="lbl">${l.pCargo}</span><input type="text" data-pa="cargo" value="${esc(P.cargo)}" autocomplete="off"></label>
+      <div class="f full"><span class="lbl">${l.pRep} ${P.modo==="firma"?R:""}</span><div class="radios">${Object.entries(l.reps).map(([v,t])=>`<label class="radio"><input type="radio" name="prep" value="${v}" ${P.rep===v?"checked":""}>${t}</label>`).join("")}</div></div>
+      <label class="f"><span class="lbl">${l.pIdT}</span><select data-pa="idTipo">${Object.entries(l.idTypes).map(([v,t])=>`<option value="${v}" ${P.idTipo===v?"selected":""}>${t}</option>`).join("")}</select></label>
+      <label class="f"><span class="lbl">${l.pIdN}</span><input type="text" data-pa="idNum" value="${esc(P.idNum)}" placeholder="${l.pIdNPh}" autocomplete="off"></label>
+      <label class="f"><span class="lbl">${l.pFolio}</span><input type="text" data-pa="folio" value="${esc(P.folio)}" autocomplete="off"></label>
+      <div class="f"><span class="lbl">${l.pFolioPhoto} ${P.modo==="firma"?R:""}</span><div class="folio">
+        ${P.folioFoto?`<div class="th"><img src="${P.folioFoto}" alt="${l.pFolioPhoto}"><button type="button" id="rmFolio" aria-label="${l.rmPhoto}">×</button></div>`:""}
+        <div class="btns"><span class="btn solid sm filebtn">${l.takePhoto}<input type="file" accept="image/*" capture="environment" data-folio="1" aria-label="${l.takePhoto}"></span>
+        <span class="btn sm filebtn">${l.gallery}<input type="file" accept="image/*" data-folio="1" aria-label="${l.gallery}"></span></div></div>
+        <span class="privacy">${l.pFolioHint}</span></div>
+    </div>`;
+  if(P.modo==="firma"){
+    h+=`<div class="decl"><p>${l.declTxt(c.t,c.d)}</p>
+      <div class="radios">${[["conforme",l.conforme],["reservas",l.reservas]].map(([v,t])=>`<label class="radio"><input type="radio" name="pdecl" value="${v}" ${P.decl===v?"checked":""}>${t}</label>`).join("")}</div>
+      ${P.decl==="reservas"?`<label class="f"><span class="lbl" style="color:#fff">${l.reservasLbl} ${R}</span><textarea data-pa="reservas" placeholder="${l.reservasPh}">${esc(P.reservas)}</textarea></label>`:""}</div>
+      <div class="sigs two">${sigCard("interesada",true,!P.decl)}</div>${P.decl?"":`<span class="privacy">${l.declFirst}</span>`}`;
+  } else {
+    h+=`<label class="f"><span class="lbl">${l.refuseMotivo}</span><textarea data-pa="motivo">${esc(P.motivo)}</textarea></label>
+      <p class="privacy" style="margin:0">${l.refuseNote}</p><div class="sigs two">${sigCard("testigo",true)}</div>`;
+  }
+  return h+`<span class="privacy">${l.privacy}</span></div>`;
+}
+function partyLine(){ const l=L(), P=S.parte, F=S.firmas;
+  if(P.modo==="negativa") return `${l.pTitleI}: <b>${l.partyRef}</b>${F.interesada.nombre?` · ${esc(F.interesada.nombre)}`:""} · ${l.sigs.testigo}: ${esc(F.testigo.nombre)||"—"}`;
+  return `${l.pTitleI}: <b>${esc(F.interesada.nombre)||"—"}</b>${P.empresa?` · ${esc(P.empresa)}`:""}${P.decl?` · <b>${P.decl==="conforme"?l.conforme:l.reservas}</b>`:""}`; }
 function summaryTable(t){
   const codes=[...t.piece,...t.tarima];
   return `<div class="tbl"><table><thead><tr><th>#</th><th style="text-align:left">${L().pdfNum}</th><th>SD</th>${codes.map(c=>`<th title="${esc(cn(c))}">${c}</th>`).join("")}<th>📷</th></tr></thead><tbody>
@@ -510,15 +611,24 @@ function refreshPieceHead(p){
 
 /* ---------- Firma (ventana) ---------- */
 const cv=$("#sigCv"), ctx=cv.getContext("2d"); let inked=false;
+let strokeLen=0, bb=null;
 function openSig(k){
-  sigKey=k; $("#sigTitle").textContent=L().sigs[k]; $("#sigModal").hidden=false;
+  const l=L();
+  if(k==="interesada" && !S.parte.decl){ toast(l.declFirst); return; }
+  sigKey=k; $("#sigTitle").textContent=l.sigs[k]; $("#sigModal").hidden=false;
+  const note=$("#sigNote");
+  if(k==="interesada"){ const c=counts(); note.textContent=`${l.declTxt(c.t,c.d)} — ${S.parte.decl==="conforme"?l.conforme:l.reservas}${S.parte.decl==="reservas"&&S.parte.reservas?": "+S.parte.reservas:""}`; note.hidden=false; }
+  else if(k==="testigo"){ note.textContent=l.refuseNote; note.hidden=false; } else note.hidden=true;
+  strokeLen=0; bb=null;
   const r=cv.getBoundingClientRect(), dpr=Math.max(1,window.devicePixelRatio||1);
   cv.width=r.width*dpr; cv.height=r.height*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.lineWidth=2.4; ctx.lineCap="round"; ctx.lineJoin="round"; ctx.strokeStyle="#0b1f4d"; inked=false;
 }
 (function(){ let drawing=false,last=null; const pt=e=>{const r=cv.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top];};
   cv.addEventListener("pointerdown",e=>{drawing=true;last=pt(e);cv.setPointerCapture(e.pointerId);e.preventDefault();});
-  cv.addEventListener("pointermove",e=>{ if(!drawing) return; const p=pt(e); ctx.beginPath(); ctx.moveTo(...last); ctx.lineTo(...p); ctx.stroke(); last=p; inked=true; });
+  cv.addEventListener("pointermove",e=>{ if(!drawing) return; const p=pt(e); ctx.beginPath(); ctx.moveTo(...last); ctx.lineTo(...p); ctx.stroke();
+    strokeLen+=Math.hypot(p[0]-last[0],p[1]-last[1]); bb=bb?[Math.min(bb[0],p[0]),Math.min(bb[1],p[1]),Math.max(bb[2],p[0]),Math.max(bb[3],p[1])]:[p[0],p[1],p[0],p[1]];
+    last=p; inked=true; });
   ["pointerup","pointercancel"].forEach(ev=>cv.addEventListener(ev,()=>drawing=false)); })();
 function trimSig(){ // recorta el trazo para que la firma ocupe bien el recuadro del PDF
   const w=cv.width,h=cv.height,d=ctx.getImageData(0,0,w,h).data; let x0=w,y0=h,x1=0,y1=0;
@@ -542,13 +652,18 @@ document.addEventListener("input",e=>{
   if(el.dataset.k){ S[el.dataset.k]=el.value; el.classList.remove("bad"); renderNav(); save(); }
   else if(el.dataset.pid){ const p=P(el.dataset.pid); p.id=el.value; refreshPieceHead(p); save(); }
   else if(el.dataset.nota){ P(el.dataset.nota).nota=el.value; save(); }
-  else if(el.dataset.sig){ S.firmas[el.dataset.sig].nombre=el.value; save(); }
+  else if(el.dataset.sig){ S.firmas[el.dataset.sig].nombre=el.value; renderNav(); save(); }
+  else if(el.dataset.pa){ S.parte[el.dataset.pa]=el.value; renderNav(); save(); }
 });
 document.addEventListener("change",async e=>{
   const el=e.target;
   if(el.name==="turno"){ S.turno=el.value; renderNav(); save(); }
   if(el.id==="sian"){ S.sian=el.checked; render(); save(); }
-  if(el.id==="howto"){}
+  if(el.name==="pmode"){ S.parte.modo=el.value; render(); save(); }
+  if(el.name==="prep"){ S.parte.rep=el.value; renderNav(); save(); }
+  if(el.name==="pdecl"){ if(S.parte.decl!==el.value && S.firmas.interesada.img){ S.firmas.interesada.img=null; S.firmas.interesada.ts=null; } S.parte.decl=el.value; render(); save(); }
+  if(el.dataset.pa && el.tagName==="SELECT"){ S.parte[el.dataset.pa]=el.value; save(); }
+  if(el.dataset.folio){ const f=el.files[0]; if(!f) return; try{ S.parte.folioFoto=await compress(f); render(); save(); toast(L().toastPhotos(1)); }catch(err){ toast(L().toastPhErr); } }
   if(el.dataset.ph){ const p=P(el.dataset.ph), files=[...el.files]; if(!files.length) return; let n=0;
     for(const f of files){ try{ p.fotos.push(await compress(f)); n++; }catch(err){ toast(L().toastPhErr); } }
     render(); save(); if(n) toast(L().toastPhotos(n)); }
@@ -582,9 +697,12 @@ document.addEventListener("click",e=>{
     S.piezas=S.piezas.filter(p=>p.id.trim()||p.marks.length||p.fotos.length); ids.forEach(id=>{ const np=newPiece(id); np.open=false; S.piezas.push(np); });
     if(!S.piezas.length) S.piezas=[newPiece()]; render(); save(); toast(l.pasted(ids.length)); return; }
   if(b.dataset.sign){ openSig(b.dataset.sign); return; }
-  if(b.id==="sigClear"){ ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height); ctx.restore(); inked=false; return; }
+  if(b.id==="sigClear"){ ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height); ctx.restore(); inked=false; strokeLen=0; bb=null; return; }
   if(b.id==="sigCancel"){ $("#sigModal").hidden=true; return; }
-  if(b.id==="sigSave"){ if(!inked){ toast(l.sigEmpty); return; } S.firmas[sigKey].img=trimSig(); $("#sigModal").hidden=true; render(); save(); return; }
+  if(b.id==="sigSave"){ if(!inked){ toast(l.sigEmpty); return; }
+    const wBox=bb?bb[2]-bb[0]:0; if(strokeLen<150 || wBox<70){ toast(l.sigShort); return; }
+    S.firmas[sigKey].img=trimSig(); S.firmas[sigKey].ts=Date.now(); $("#sigModal").hidden=true; render(); save(); return; }
+  if(b.id==="rmFolio"){ S.parte.folioFoto=null; render(); save(); return; }
   if(b.id==="pdfBtn"){ makePDF("download"); return; }
   if(b.id==="shareBtn"){ makePDF("share"); return; }
   if(b.id==="resetBtn"){ confirmReset=true; render(); return; }
@@ -603,7 +721,7 @@ function loadExample(){
   S.piezas=[{...newPiece("RL-00451"),marks:["G","TQ"],fotos:[IMG.rollos.G],nota:LANG==="es"?"Golpe en la parte baja del rollo":"Impact on the lower part of the roll",open:false},
             {...newPiece("RL-00452"),marks:["SD"],open:false},{...newPiece("RL-00453"),marks:["FR","FD"],fotos:[IMG.rollos.FR],open:false}];
   S.obs=LANG==="es"?"Ejemplo de captura. Sustituye estos datos por los de tu inspección.":"Sample entry. Replace with your inspection data.";
-  S.sian=true; S.sianFolio="SIAN-0000"; S.step=0; render(); save(); toast(L().toastEx);
+  S.sian=true; S.sianFolio="SIAN-0000"; S.parte.empresa=LANG==="es"?"Ejemplo Surveyors S.A.":"Sample Surveyors Inc."; S.parte.rep="surveyor"; S.parte.folio="F-0000"; S.step=0; render(); save(); toast(L().toastEx);
 }
 
 /* ---------- PDF ---------- */
@@ -644,22 +762,44 @@ async function buildPDF(){
   doc.setFont("helvetica","bold"); doc.text(l.pdfSian,M,y+2); doc.setFont("helvetica","normal");
   doc.text(S.sian?`${l.pdfYes}${S.sianFolio?" — "+l.pdfFolio+" "+S.sianFolio:""}`:(c.d?l.pdfNotInd:l.pdfNA),M+30,y+2);
   doc.text(l.pdfSum(c.t,c.d,c.o,c.f),W/2,y+2); y+=8;
-  const bw=(W-2*M-16)/3, bh=38;
-  for(let i=0;i<3;i++){ const k=SIGK[i], x=M+i*(bw+8), f=S.firmas[k];
+  // Parte interesada
+  const PA=S.parte, FI=S.firmas.interesada, neg=PA.modo==="negativa";
+  const idTxt=[l.idTypes[PA.idTipo]||"",PA.idNum].filter(Boolean).join(" ");
+  const declRow = neg ? [l.pdfState,{content:`${l.partyRef.toUpperCase()}${PA.motivo?". "+l.refuseMotivo+": "+PA.motivo:""}`,colSpan:3}]
+    : [l.pdfDecl,{content:`${l.declTxt(c.t,c.d)}  ${(PA.decl==="conforme"?l.conforme:l.reservas).toUpperCase()}${PA.decl==="reservas"?": "+PA.reservas:""}`,colSpan:3}];
+  doc.autoTable({startY:y,margin:{left:M,right:M,top:TOP,bottom:16},theme:"grid",
+    styles:{fontSize:8.2,cellPadding:1.6,lineColor:[170,185,176],lineWidth:.2,textColor:INK},
+    headStyles:{fillColor:GREEN,textColor:255,fontStyle:"bold",fontSize:8},
+    columnStyles:{0:{fontStyle:"bold",fillColor:SOFT,cellWidth:38},2:{fontStyle:"bold",fillColor:SOFT,cellWidth:38}},
+    head:[[{content:l.pTitleI.toUpperCase(),colSpan:4}]],
+    body:[[l.pFull,FI.nombre,l.pEmp,PA.empresa],[l.pRep,l.reps[PA.rep]||"",l.pCargo,PA.cargo],[l.pIdT,idTxt,l.pFolio,PA.folio],declRow],
+    didParseCell:d=>{ if(d.section==="body"&&d.row.index===3&&d.column.index===1&&!neg&&PA.decl==="reservas") d.cell.styles.textColor=RED; }});
+  y=doc.lastAutoTable.finalY+4;
+  const bw=(W-2*M-16)/3, bh=42;
+  if(y+bh+6>H-16){ doc.addPage(); y=TOP; }
+  const third=neg?"testigo":"interesada";
+  const thirdLbl=neg?`${l.sigs.testigo} (${l.partyRef.toLowerCase()})`:l.sigs.interesada;
+  const boxes=[["inspector",l.sigs.inspector],["supervisor",l.sigs.supervisor],[third,thirdLbl]];
+  for(let i=0;i<3;i++){ const [k,lbl]=boxes[i], x=M+i*(bw+8), f=S.firmas[k];
     doc.setDrawColor(170,185,176); doc.setLineWidth(.2); doc.rect(x,y,bw,bh);
-    if(f.img){ const [iw,ih]=await imgSize(f.img); const mw=bw-10, mh=bh-17, s=Math.min(mw/iw,mh/ih); doc.addImage(f.img,"PNG",x+(bw-iw*s)/2,y+2+(mh-ih*s)/2,iw*s,ih*s); }
-    doc.setDrawColor(...INK); doc.line(x+6,y+bh-13,x+bw-6,y+bh-13);
-    doc.setFontSize(8.5); doc.setTextColor(...INK); doc.text(f.nombre||"",x+bw/2,y+bh-8.5,{align:"center"});
-    doc.setFontSize(7.5); doc.setTextColor(...MUT); doc.text(`${l.pdfSign} — ${l.sigs[k]}`,x+bw/2,y+bh-3.5,{align:"center"}); }
-  const shots=[]; S.piezas.forEach((p,i)=>p.fotos.forEach((f,j)=>shots.push({p,i,j,f})));
+    if(f.img){ const [iw,ih]=await imgSize(f.img); const mw=bw-10, mh=bh-21, s=Math.min(mw/iw,mh/ih); doc.addImage(f.img,"PNG",x+(bw-iw*s)/2,y+2+(mh-ih*s)/2,iw*s,ih*s); }
+    doc.setDrawColor(...INK); doc.line(x+6,y+bh-17,x+bw-6,y+bh-17);
+    doc.setFontSize(8.5); doc.setTextColor(...INK); doc.text(f.nombre||"",x+bw/2,y+bh-12.5,{align:"center"});
+    doc.setFontSize(7.2); doc.setTextColor(...MUT); doc.text(f.ts?`${l.signedAt}: ${fmtTs(f.ts)}`:"",x+bw/2,y+bh-8,{align:"center"});
+    doc.text(doc.splitTextToSize(`${l.pdfSign} — ${lbl}`,bw-4)[0],x+bw/2,y+bh-3.5,{align:"center"}); }
+  doc.setFontSize(7); doc.setTextColor(...MUT); doc.text(l.privacy,M,y+bh+4);
+  const shots=[]; if(PA.folioFoto) shots.push({folio:true,f:PA.folioFoto});
+  S.piezas.forEach((p,i)=>p.fotos.forEach((f,j)=>shots.push({p,i,j,f})));
   if(shots.length){ const cols=3,rows=2,gx=6,cw=(W-2*M-(cols-1)*gx)/cols,ch=(H-TOP-16-10-(rows-1)*6)/rows,capH=9;
     for(let s=0;s<shots.length;s++){ const slot=s%(cols*rows);
       if(slot===0){ doc.addPage(); doc.setFontSize(10); doc.setFont("helvetica","bold"); doc.setTextColor(...GREEN); doc.text(l.pdfAnnex,M,TOP+2); doc.setFont("helvetica","normal"); }
       const {p,i,j,f}=shots[s], cx=M+(slot%cols)*(cw+gx), cy=TOP+8+Math.floor(slot/cols)*(ch+6);
       const [iw,ih]=await imgSize(f), bhI=ch-capH, sc=Math.min(cw/iw,bhI/ih), w=iw*sc, h=ih*sc;
       doc.setFillColor(240,243,241); doc.rect(cx,cy,cw,bhI,"F"); doc.addImage(f,"JPEG",cx+(cw-w)/2,cy+(bhI-h)/2,w,h,undefined,"MEDIUM");
-      const dm=p.marks.filter(m=>m!=="SD"); doc.setFontSize(8); doc.setTextColor(...INK);
-      doc.text(doc.splitTextToSize(`#${i+1} · ${p.id||l.pdfNoIdShort} · ${l.pdfPhoto} ${j+1} · ${dm.length?dm.map(m=>m+" "+cn(m)).join(", "):cn("SD")}`,cw),cx,cy+bhI+4); } }
+      doc.setFontSize(8); doc.setTextColor(...INK);
+      const cap = shots[s].folio ? `${l.pFolio} — ${l.sigs.interesada}${PA.folio?": "+PA.folio:""}`
+        : (()=>{ const dm=p.marks.filter(m=>m!=="SD"); return `#${i+1} · ${p.id||l.pdfNoIdShort} · ${l.pdfPhoto} ${j+1} · ${dm.length?dm.map(m=>m+" "+cn(m)).join(", "):cn("SD")}`; })();
+      doc.text(doc.splitTextToSize(cap,cw),cx,cy+bhI+4); } }
   const n=doc.getNumberOfPages();
   for(let pg=1;pg<=n;pg++){ doc.setPage(pg);
     const hx=M,hy=8,hw=W-2*M,hh=24,lw=40,rw=58;
@@ -697,7 +837,7 @@ async function makePDF(mode){
   const th=pref("theme"); if(th==="dark"||th==="light") document.documentElement.dataset.theme=th;
   render();
   await DB.open(); const d=await DB.get();
-  if(d && d.v===2){ S=d; render(); if(S.tipo||S.servicio) toast(L().toastRestored); }
+  const md=migrate(d); if(md){ S=md; render(); if(S.tipo||S.servicio) toast(L().toastRestored); }
 })();
 </script>
 
